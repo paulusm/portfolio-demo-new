@@ -1,0 +1,827 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>Paul Matthews&#39; Data Science Portfolio</title>
+<link>https://your-website-url.example.com/</link>
+<atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
+<description>A blog built with Quarto</description>
+<generator>quarto-1.8.27</generator>
+<lastBuildDate>Thu, 12 Feb 2026 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Clustering with Python Project</title>
+  <dc:creator>Paul Matthews</dc:creator>
+  <link>https://your-website-url.example.com/posts/clustering/SK6_Clustering.html</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<section id="sk-part-6-k-means-clustering" class="level1">
+<h1>SK Part 6: K-Means Clustering</h1>
+<p><strong>Credit:</strong> This tutorial was adapted from <a href="http://shop.oreilly.com/product/0636920034919.do">Python Data Science Handbook</a>.</p>
+<p>This tutorial is about an unsupervised machine learning method: <em>clustering</em>. Clustering algorithms attempt to find groups of objects such that the objects in a group will be similar to one another and different from the objects in other groups. By far, the most popular method is <em>k-means clustering</em>, which is the topic of this tutorial.</p>
+<p>It should be noted that clustering is still an active area of research. There are dozens of clustering algorithms in the literature, yet no single algorithm outperforms the others on all clustering problems, illustrating the difficulty of this task in general.</p>
+<div id="cell-3" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> warnings</span>
+<span id="cb1-2">warnings.filterwarnings(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"ignore"</span>)</span>
+<span id="cb1-3"></span>
+<span id="cb1-4"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> matplotlib.pyplot <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> plt</span>
+<span id="cb1-5"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span>matplotlib inline</span>
+<span id="cb1-6"><span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">%</span>config InlineBackend.figure_format <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'retina'</span></span>
+<span id="cb1-7">plt.style.use(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"ggplot"</span>)</span>
+<span id="cb1-8"></span>
+<span id="cb1-9"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> seaborn <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> sns<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span> sns.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">set</span>()</span>
+<span id="cb1-10"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span></code></pre></div></div>
+</div>
+<p>The <em>k</em>-means algorithm searches for a pre-determined number of clusters within an unlabeled multidimensional dataset. It accomplishes this using a simple conception of what the optimal clustering looks like:</p>
+<ul>
+<li>The “cluster center” is the arithmetic mean of all the points belonging to the cluster.</li>
+<li>Each point is closer to its own cluster center than to other cluster centers.</li>
+</ul>
+<p>Those two assumptions are the basis of the <em>k</em>-means model. Let’s take a look at a simple dataset and see the <em>k</em>-means result.</p>
+<p>First, let’s generate a two-dimensional dataset containing four distinct blobs. To emphasize that this is an unsupervised algorithm, we will leave the labels out of the visualization.</p>
+<div id="cell-5" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="e55822a5-3a01-47d6-f4f8-16f37a906f74" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.datasets <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> make_blobs</span>
+<span id="cb2-2">X, y_true <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_blobs(n_samples<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">300</span>, centers<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>,</span>
+<span id="cb2-3">                       cluster_std<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.60</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb2-4">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-3-output-1.png" width="537" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>By visual inspection, it is easy to pick out the four clusters.</p>
+<p>Pay attention to how we import the <code>KMeans</code> method below, set the number of clusters we want, and fit the method with our data.</p>
+<div id="cell-7" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.cluster <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> KMeans</span>
+<span id="cb3-2">kmeans <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> KMeans(n_clusters<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>)</span>
+<span id="cb3-3">kmeans.fit(X)</span>
+<span id="cb3-4">y_kmeans <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> kmeans.predict(X)</span></code></pre></div></div>
+</div>
+<p>Let’s visualize the results by plotting the data colored by these labels. We will also plot the cluster centers as determined by the <em>k</em>-means estimator:</p>
+<div id="cell-9" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="44d5ff25-458e-4daf-c504-fbb144994c98" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>y_kmeans, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'viridis'</span>)</span>
+<span id="cb4-2"></span>
+<span id="cb4-3">centers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> kmeans.cluster_centers_</span>
+<span id="cb4-4">plt.scatter(centers[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], centers[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'black'</span>, s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>, alpha<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1.0</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-5-output-1.png" width="537" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The good news is that the <em>k</em>-means algorithm (at least in this simple case) assigns the points to clusters very similarly to how we might assign them by eye.</p>
+<p>The <em>k</em>-Means algorithm is simple enough that we can write it in a few lines of code. The following is a very basic implementation:</p>
+<div id="cell-12" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="732ba052-a55c-4deb-b645-01075e282bd5" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> pairwise_distances_argmin</span>
+<span id="cb5-2"></span>
+<span id="cb5-3"><span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">def</span> find_clusters(X, n_clusters, rseed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>):</span>
+<span id="cb5-4">    <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 1. Randomly choose clusters</span></span>
+<span id="cb5-5">    rng <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.random.RandomState(rseed)</span>
+<span id="cb5-6">    i <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> rng.permutation(X.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>])[:n_clusters]</span>
+<span id="cb5-7">    centers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> X[i]</span>
+<span id="cb5-8">    </span>
+<span id="cb5-9">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">while</span> <span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span>:</span>
+<span id="cb5-10">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 2a. Assign labels based on closest center</span></span>
+<span id="cb5-11">        labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pairwise_distances_argmin(X, centers)</span>
+<span id="cb5-12">        </span>
+<span id="cb5-13">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 2b. Find new centers from means of points</span></span>
+<span id="cb5-14">        new_centers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.array([X[labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> i].mean(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb5-15">                                <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> i <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">range</span>(n_clusters)])</span>
+<span id="cb5-16">        </span>
+<span id="cb5-17">        <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 2c. Check for convergence</span></span>
+<span id="cb5-18">        <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> np.<span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">all</span>(centers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">==</span> new_centers):</span>
+<span id="cb5-19">            <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">break</span></span>
+<span id="cb5-20">        centers <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> new_centers</span>
+<span id="cb5-21">    </span>
+<span id="cb5-22">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">return</span> centers, labels</span>
+<span id="cb5-23"></span>
+<span id="cb5-24">centers, labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> find_clusters(X, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>)</span>
+<span id="cb5-25">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>labels,</span>
+<span id="cb5-26">            s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'viridis'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-6-output-1.png" width="537" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<section id="potential-issues-with-the-k-means-algorithm" class="level3">
+<h3 class="anchored" data-anchor-id="potential-issues-with-the-k-means-algorithm">Potential issues with the <em>k</em>-means algorithm</h3>
+<section id="the-globally-optimal-result-may-not-be-achieved" class="level4">
+<h4 class="anchored" data-anchor-id="the-globally-optimal-result-may-not-be-achieved">1 - The globally optimal result may not be achieved</h4>
+<p>First, although the <em>k</em>-means algorithm is guaranteed to improve the result in each step, there is no assurance that it will lead to the <em>global</em> best solution. For example, if we use a different random seed in our simple procedure, we might get a poor result:</p>
+<div id="cell-15" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="de3ada0e-638f-4525-e04c-9a1d05656285" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1">centers, labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> find_clusters(X, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4</span>, rseed<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span>
+<span id="cb6-2">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>labels,</span>
+<span id="cb6-3">            s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'viridis'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-7-output-1.png" width="537" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Here the <em>k</em>-means algorithm has converged, but has not converged to a globally optimal configuration. For this reason, it is common for the algorithm to be run for multiple starting guesses, as indeed Scikit-Learn does by default (set by the <code>n_init</code> parameter, which defaults to 10).</p>
+</section>
+<section id="the-number-of-clusters-must-be-selected-beforehand" class="level4">
+<h4 class="anchored" data-anchor-id="the-number-of-clusters-must-be-selected-beforehand">2 - The number of clusters must be selected beforehand</h4>
+<p>Another common challenge with <em>k</em>-means is that you must tell it how many clusters you expect: it cannot learn the number of clusters from the data. For example, if we ask the algorithm to identify six clusters, it will happily proceed and find the best six clusters:</p>
+<div id="cell-18" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="c49819f2-ebf2-498f-b43d-ff9bf8b4728d" data-execution_count="7">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1">labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> KMeans(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).fit_predict(X)</span>
+<span id="cb7-2">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>labels,</span>
+<span id="cb7-3">            s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'viridis'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-8-output-1.png" width="537" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="k-means-is-limited-to-linear-cluster-boundaries" class="level4">
+<h4 class="anchored" data-anchor-id="k-means-is-limited-to-linear-cluster-boundaries">3 - <em>k</em>-means is limited to linear cluster boundaries</h4>
+<p>The fundamental model assumptions of <em>k</em>-means (points will be closer to their own cluster center than to others) means that the algorithm will often be ineffective if the clusters have complicated geometries.</p>
+<p>In particular, the boundaries between <em>k</em>-means clusters will always be linear, which means that it will fail for more complicated boundaries. Consider the following data, along with the cluster labels found by the typical <em>k</em>-means approach:</p>
+<div id="cell-20" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-execution_count="8">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.datasets <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> make_moons</span>
+<span id="cb8-2">X, y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> make_moons(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">200</span>, noise<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">.05</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>)</span></code></pre></div></div>
+</div>
+<div id="cell-21" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="a1d0e619-1d70-49c1-c1a4-11972e23d41f" data-execution_count="9">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1">labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> KMeans(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, random_state<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>).fit_predict(X)</span>
+<span id="cb9-2">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>labels,</span>
+<span id="cb9-3">            s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'viridis'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-10-output-1.png" width="567" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>In order to discover non-linear boundaries, we can use the <code>SpectralClustering</code> method. It uses the graph of nearest neighbors to compute a higher-dimensional representation of the data, and then assigns labels using a <em>k</em>-means algorithm:</p>
+<div id="cell-23" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="0132ad13-d76d-4296-82cd-11a17305f8b9" data-execution_count="10">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb10-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.cluster <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> SpectralClustering</span>
+<span id="cb10-2">model <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> SpectralClustering(n_clusters<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, affinity<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'nearest_neighbors'</span>,</span>
+<span id="cb10-3">                           assign_labels<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'kmeans'</span>)</span>
+<span id="cb10-4">labels <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> model.fit_predict(X)</span>
+<span id="cb10-5">plt.scatter(X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], X[:, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>], c<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>labels,</span>
+<span id="cb10-6">            s<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">50</span>, cmap<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'viridis'</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-11-output-1.png" width="567" height="417" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="example-k-means-for-color-compression" class="level2">
+<h2 class="anchored" data-anchor-id="example-k-means-for-color-compression">Example: <em>k</em>-means for color compression</h2>
+<p>One interesting application of clustering is in color compression within images. For example, imagine you have an image with millions of colors. In most images, a large number of the colors will be unused, and many of the pixels in the image will have similar or even identical colors.</p>
+<p>For example, consider the image shown in the following figure, which is from the Scikit-Learn <code>datasets</code> module (for this to work, you’ll have to have the <code>pillow</code> Python package installed).</p>
+<div id="cell-25" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="23ea3908-d82f-40eb-9d7f-13aa84d2a9b6" data-execution_count="11">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb11" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Note: this requires the ``pillow`` package to be installed</span></span>
+<span id="cb11-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.datasets <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> load_sample_image</span>
+<span id="cb11-3">flower <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> load_sample_image(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"flower.jpg"</span>)</span>
+<span id="cb11-4">plt.figure(figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">20</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span>))</span>
+<span id="cb11-5">ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.axes(xticks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[], yticks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[])</span>
+<span id="cb11-6">ax.imshow(flower)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-12-output-1.png" width="1174" height="790" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>The image itself is stored in a three-dimensional array of size <code>(height, width, RGB)</code>, containing red/blue/green contributions as integers from 0 to 255:</p>
+<div id="cell-27" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="7635cfa9-827b-4aab-8dfb-91edf98211e2" data-execution_count="12">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb12" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1">flower.shape</span></code></pre></div></div>
+<div class="cell-output cell-output-display" data-execution_count="12">
+<pre><code>(427, 640, 3)</code></pre>
+</div>
+</div>
+<p>Let’s have a look at the color (red/blue/green contributions) of the top left pixel. The <em>k</em>-means algorithm will be clustering these colors expressed as 3-dimensional objects.</p>
+<div id="cell-29" class="cell" data-execution_count="13">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb14" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1">flower[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>,:]</span></code></pre></div></div>
+<div class="cell-output cell-output-display" data-execution_count="13">
+<pre><code>array([ 2, 19, 13], dtype=uint8)</code></pre>
+</div>
+</div>
+<p>We will reshape the data to <code>[n_samples x n_features]</code>, and rescale the colors so that they lie between 0 and 1:</p>
+<div id="cell-31" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="847bd1cd-9e77-4b5f-817a-3dc267d2cd39" data-execution_count="14">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb16" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1">data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> flower <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">/</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">255.0</span> <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># use 0...1 scale</span></span>
+<span id="cb16-2">data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> data.reshape(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">427</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">640</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3</span>)</span>
+<span id="cb16-3">data.shape</span></code></pre></div></div>
+<div class="cell-output cell-output-display" data-execution_count="14">
+<pre><code>(273280, 3)</code></pre>
+</div>
+</div>
+<p>Now let’s reduce these 16 million colors to just 10 colors, using a <em>k</em>-means clustering across the pixel space. Because we are dealing with a very large dataset, we will use the mini batch <em>k</em>-means, which operates on subsets of the data to compute the result much more quickly than the standard <em>k</em>-means algorithm:</p>
+<div id="cell-33" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="da23934e-a0ca-4673-e75d-92cb6f954077" data-execution_count="15">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb18" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.cluster <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> MiniBatchKMeans</span>
+<span id="cb18-2">num_clusters <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">10</span></span>
+<span id="cb18-3">kmeans <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MiniBatchKMeans(num_clusters)</span>
+<span id="cb18-4">kmeans.fit(data)</span>
+<span id="cb18-5">predicted_data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> kmeans.predict(data)</span>
+<span id="cb18-6">new_colors <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> kmeans.cluster_centers_[predicted_data]</span></code></pre></div></div>
+</div>
+<p>The result is a re-coloring of the original pixels, where each pixel is assigned the color of its closest cluster center. Plotting these new colors in the image space rather than the pixel space shows us the effect of this:</p>
+<div id="cell-35" class="cell" data-quarto-private-1="{&quot;key&quot;:&quot;colab&quot;,&quot;value&quot;:{}}" data-outputid="abec3707-3f02-4eaa-ba27-a4d62b7e3d73" data-execution_count="16">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb19" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb19-1">flower_recolored <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> new_colors.reshape(flower.shape)</span>
+<span id="cb19-2"></span>
+<span id="cb19-3">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>),</span>
+<span id="cb19-4">                       subplot_kw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>(xticks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[], yticks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[]))</span>
+<span id="cb19-5">fig.subplots_adjust(wspace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>)</span>
+<span id="cb19-6">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].imshow(flower)</span>
+<span id="cb19-7">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Original Image (16 million colours)'</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>)</span>
+<span id="cb19-8">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].imshow(flower_recolored)</span>
+<span id="cb19-9">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Reduced Colour Image (10 colours)'</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-17-output-1.png" width="1260" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Some detail is certainly lost in the right picture, but the overall image is still easily recognizable. This image on the right achieves a compression factor of around 1.6 million!</p>
+<p>For fun, below is the output of k-means with only 2 clusters.</p>
+<div id="cell-38" class="cell" data-execution_count="17">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb20" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb20-1">num_clusters <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span></span>
+<span id="cb20-2">kmeans <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> MiniBatchKMeans(num_clusters)</span>
+<span id="cb20-3">kmeans.fit(data)</span>
+<span id="cb20-4">predicted_data <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> kmeans.predict(data)</span>
+<span id="cb20-5">new_colors <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> kmeans.cluster_centers_[predicted_data]</span>
+<span id="cb20-6"></span>
+<span id="cb20-7">flower_recolored <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> new_colors.reshape(flower.shape)</span>
+<span id="cb20-8"></span>
+<span id="cb20-9">fig, ax <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> plt.subplots(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>, figsize<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">6</span>),</span>
+<span id="cb20-10">                       subplot_kw<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">dict</span>(xticks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[], yticks<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>[]))</span>
+<span id="cb20-11">fig.subplots_adjust(wspace<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.05</span>)</span>
+<span id="cb20-12">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].imshow(flower)</span>
+<span id="cb20-13">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>].set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Original Image (16 million colours)'</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>)</span>
+<span id="cb20-14">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].imshow(flower_recolored)</span>
+<span id="cb20-15">ax[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>].set_title(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">'Reduced Colur Image (2 colours)'</span>, size<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">16</span>)<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">;</span></span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-18-output-1.png" width="1260" height="447" class="figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<hr>
+
+
+</section>
+</section>
+
+ ]]></description>
+  <category>news</category>
+  <category>code</category>
+  <category>analysis</category>
+  <guid>https://your-website-url.example.com/posts/clustering/SK6_Clustering.html</guid>
+  <pubDate>Thu, 12 Feb 2026 00:00:00 GMT</pubDate>
+</item>
+<item>
+  <title>Post With Code</title>
+  <dc:creator>Harlow Malloc</dc:creator>
+  <link>https://your-website-url.example.com/posts/post-with-code/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This is a post with executable code.</p>
+
+
+
+ ]]></description>
+  <category>news</category>
+  <category>code</category>
+  <category>analysis</category>
+  <guid>https://your-website-url.example.com/posts/post-with-code/</guid>
+  <pubDate>Thu, 12 Feb 2026 00:00:00 GMT</pubDate>
+  <media:content url="https://your-website-url.example.com/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
+</item>
+<item>
+  <title>Welcome To My Blog</title>
+  <dc:creator>Tristan O&#39;Malley</dc:creator>
+  <link>https://your-website-url.example.com/posts/welcome/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>This is the first post in a Quarto blog. Welcome!</p>
+<p><img src="https://your-website-url.example.com/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
+<p>Since this post doesn’t specify an explicit <code>image</code>, the first image in the post will be used in the listing page of posts.</p>
+
+
+
+ ]]></description>
+  <category>news</category>
+  <guid>https://your-website-url.example.com/posts/welcome/</guid>
+  <pubDate>Mon, 09 Feb 2026 00:00:00 GMT</pubDate>
+</item>
+</channel>
+</rss>
