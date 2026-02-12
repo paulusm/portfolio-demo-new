@@ -1,17 +1,10 @@
 [
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Paul Matthews’ Data Science Portfolio",
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
     "section": "",
-    "text": "–"
-  },
-  {
-    "objectID": "posts/welcome/index.html",
-    "href": "posts/welcome/index.html",
-    "title": "Welcome To My Blog",
-    "section": "",
-    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
+    "text": "About this blog"
   },
   {
     "objectID": "posts/post-with-code/index.html",
@@ -21,11 +14,11 @@
     "text": "This is a post with executable code."
   },
   {
-    "objectID": "about.html",
-    "href": "about.html",
-    "title": "About",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Paul Matthews’ Data Science Portfolio",
     "section": "",
-    "text": "About this blog"
+    "text": "–"
   },
   {
     "objectID": "index.html#this-site-contains-examples-of-some-of-my-work",
@@ -47,5 +40,12 @@
     "title": "Clustering with Python Project",
     "section": "",
     "text": "One interesting application of clustering is in color compression within images. For example, imagine you have an image with millions of colors. In most images, a large number of the colors will be unused, and many of the pixels in the image will have similar or even identical colors.\nFor example, consider the image shown in the following figure, which is from the Scikit-Learn datasets module (for this to work, you’ll have to have the pillow Python package installed).\n\n# Note: this requires the ``pillow`` package to be installed\nfrom sklearn.datasets import load_sample_image\nflower = load_sample_image(\"flower.jpg\")\nplt.figure(figsize=(20,10))\nax = plt.axes(xticks=[], yticks=[])\nax.imshow(flower);\n\n\n\n\n\n\n\n\nThe image itself is stored in a three-dimensional array of size (height, width, RGB), containing red/blue/green contributions as integers from 0 to 255:\n\nflower.shape\n\n(427, 640, 3)\n\n\nLet’s have a look at the color (red/blue/green contributions) of the top left pixel. The k-means algorithm will be clustering these colors expressed as 3-dimensional objects.\n\nflower[0,0,:]\n\narray([ 2, 19, 13], dtype=uint8)\n\n\nWe will reshape the data to [n_samples x n_features], and rescale the colors so that they lie between 0 and 1:\n\ndata = flower / 255.0 # use 0...1 scale\ndata = data.reshape(427 * 640, 3)\ndata.shape\n\n(273280, 3)\n\n\nNow let’s reduce these 16 million colors to just 10 colors, using a k-means clustering across the pixel space. Because we are dealing with a very large dataset, we will use the mini batch k-means, which operates on subsets of the data to compute the result much more quickly than the standard k-means algorithm:\n\nfrom sklearn.cluster import MiniBatchKMeans\nnum_clusters = 10\nkmeans = MiniBatchKMeans(num_clusters)\nkmeans.fit(data)\npredicted_data = kmeans.predict(data)\nnew_colors = kmeans.cluster_centers_[predicted_data]\n\nThe result is a re-coloring of the original pixels, where each pixel is assigned the color of its closest cluster center. Plotting these new colors in the image space rather than the pixel space shows us the effect of this:\n\nflower_recolored = new_colors.reshape(flower.shape)\n\nfig, ax = plt.subplots(1, 2, figsize=(16, 6),\n                       subplot_kw=dict(xticks=[], yticks=[]))\nfig.subplots_adjust(wspace=0.05)\nax[0].imshow(flower)\nax[0].set_title('Original Image (16 million colours)', size=16)\nax[1].imshow(flower_recolored)\nax[1].set_title('Reduced Colour Image (10 colours)', size=16);\n\n\n\n\n\n\n\n\nSome detail is certainly lost in the right picture, but the overall image is still easily recognizable. This image on the right achieves a compression factor of around 1.6 million!\nFor fun, below is the output of k-means with only 2 clusters.\n\nnum_clusters = 2\nkmeans = MiniBatchKMeans(num_clusters)\nkmeans.fit(data)\npredicted_data = kmeans.predict(data)\nnew_colors = kmeans.cluster_centers_[predicted_data]\n\nflower_recolored = new_colors.reshape(flower.shape)\n\nfig, ax = plt.subplots(1, 2, figsize=(16, 6),\n                       subplot_kw=dict(xticks=[], yticks=[]))\nfig.subplots_adjust(wspace=0.05)\nax[0].imshow(flower)\nax[0].set_title('Original Image (16 million colours)', size=16)\nax[1].imshow(flower_recolored)\nax[1].set_title('Reduced Colur Image (2 colours)', size=16);"
+  },
+  {
+    "objectID": "posts/welcome/index.html",
+    "href": "posts/welcome/index.html",
+    "title": "Welcome To My Blog",
+    "section": "",
+    "text": "This is the first post in a Quarto blog. Welcome!\n\nSince this post doesn’t specify an explicit image, the first image in the post will be used in the listing page of posts."
   }
 ]
