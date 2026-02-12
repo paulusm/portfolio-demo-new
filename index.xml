@@ -6,15 +6,15 @@
       version="2.0">
 <channel>
 <title>Paul Matthews&#39; Data Science Portfolio</title>
-<link>https://your-website-url.example.com/</link>
-<atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
+<link>https://paulusm.github.io/portfolio-demo-new/</link>
+<atom:link href="https://paulusm.github.io/portfolio-demo-new/index.xml" rel="self" type="application/rss+xml"/>
 <description>A blog built with Quarto</description>
 <generator>quarto-1.8.27</generator>
 <lastBuildDate>Thu, 12 Feb 2026 00:00:00 GMT</lastBuildDate>
 <item>
   <title>Clustering with Python Project</title>
   <dc:creator>Paul Matthews</dc:creator>
-  <link>https://your-website-url.example.com/posts/clustering/SK6_Clustering.html</link>
+  <link>https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering.html</link>
   <description><![CDATA[ 
 
 
@@ -115,7 +115,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-3-output-1.png" width="537" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-3-output-1.png" width="537" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -183,7 +183,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-5-output-1.png" width="537" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-5-output-1.png" width="537" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -303,7 +303,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-6-output-1.png" width="537" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-6-output-1.png" width="537" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -344,7 +344,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-7-output-1.png" width="537" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-7-output-1.png" width="537" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -385,7 +385,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-8-output-1.png" width="537" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-8-output-1.png" width="537" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -446,7 +446,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-10-output-1.png" width="567" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-10-output-1.png" width="567" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -498,7 +498,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-11-output-1.png" width="567" height="417" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-11-output-1.png" width="567" height="417" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -543,7 +543,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-12-output-1.png" width="1174" height="790" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-12-output-1.png" width="1174" height="790" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -678,7 +678,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-17-output-1.png" width="1260" height="447" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-17-output-1.png" width="1260" height="447" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -762,7 +762,7 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 <div class="cell-output cell-output-display">
 <div>
 <figure class="figure">
-<p><img src="https://your-website-url.example.com/posts/clustering/SK6_Clustering_files/figure-html/cell-18-output-1.png" width="1260" height="447" class="figure-img"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering_files/figure-html/cell-18-output-1.png" width="1260" height="447" class="figure-img"></p>
 </figure>
 </div>
 </div>
@@ -777,13 +777,13 @@ font-style: inherit;">;</span></span></code></pre></div></div>
   <category>news</category>
   <category>code</category>
   <category>analysis</category>
-  <guid>https://your-website-url.example.com/posts/clustering/SK6_Clustering.html</guid>
+  <guid>https://paulusm.github.io/portfolio-demo-new/posts/clustering/SK6_Clustering.html</guid>
   <pubDate>Thu, 12 Feb 2026 00:00:00 GMT</pubDate>
 </item>
 <item>
   <title>Post With Code</title>
   <dc:creator>Harlow Malloc</dc:creator>
-  <link>https://your-website-url.example.com/posts/post-with-code/</link>
+  <link>https://paulusm.github.io/portfolio-demo-new/posts/post-with-code/</link>
   <description><![CDATA[ 
 
 
@@ -798,14 +798,14 @@ font-style: inherit;">;</span></span></code></pre></div></div>
   <category>news</category>
   <category>code</category>
   <category>analysis</category>
-  <guid>https://your-website-url.example.com/posts/post-with-code/</guid>
+  <guid>https://paulusm.github.io/portfolio-demo-new/posts/post-with-code/</guid>
   <pubDate>Thu, 12 Feb 2026 00:00:00 GMT</pubDate>
-  <media:content url="https://your-website-url.example.com/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
+  <media:content url="https://paulusm.github.io/portfolio-demo-new/posts/post-with-code/image.jpg" medium="image" type="image/jpeg"/>
 </item>
 <item>
   <title>Welcome To My Blog</title>
   <dc:creator>Tristan O&#39;Malley</dc:creator>
-  <link>https://your-website-url.example.com/posts/welcome/</link>
+  <link>https://paulusm.github.io/portfolio-demo-new/posts/welcome/</link>
   <description><![CDATA[ 
 
 
@@ -813,14 +813,14 @@ font-style: inherit;">;</span></span></code></pre></div></div>
 
 
 <p>This is the first post in a Quarto blog. Welcome!</p>
-<p><img src="https://your-website-url.example.com/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
+<p><img src="https://paulusm.github.io/portfolio-demo-new/posts/welcome/thumbnail.jpg" class="img-fluid"></p>
 <p>Since this post doesn’t specify an explicit <code>image</code>, the first image in the post will be used in the listing page of posts.</p>
 
 
 
  ]]></description>
   <category>news</category>
-  <guid>https://your-website-url.example.com/posts/welcome/</guid>
+  <guid>https://paulusm.github.io/portfolio-demo-new/posts/welcome/</guid>
   <pubDate>Mon, 09 Feb 2026 00:00:00 GMT</pubDate>
 </item>
 </channel>
